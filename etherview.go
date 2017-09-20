@@ -149,9 +149,9 @@ func syncing() string {
 }
 
 
-func getBlock() string {
+func getBlock(blockNum string) string {
 
-    body := callApiWithParams("eth_getBlockByNumber", []interface{}{"latest", true})
+    body := callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
 
     output := fmt.Sprintf("Res:  %s!", body)
 
@@ -211,7 +211,7 @@ func getBlock() string {
 func handler(w http.ResponseWriter, r *http.Request) {
     body := syncing()
     body += blockNumber()
-    body += getBlock()
+    body += getBlock("latest")
 
     PageVars := PageVariables{ //store the data in a struct
       Body: template.HTML(body),
