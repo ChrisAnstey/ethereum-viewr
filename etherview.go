@@ -24,7 +24,7 @@ type Request1 struct {
     Params interface{} `json:"params"`
 }
 
-func callApiWithParams(method string, params interface{}) []byte {
+func callApiWithParams(method string, params interface{}) interface{} {
 
     url := "http://192.168.1.145:8545"
     url = "http://127.0.0.1:8545"
@@ -61,11 +61,17 @@ func callApiWithParams(method string, params interface{}) []byte {
         log.Fatal(readErr)
     }
 
-    return body
+    var response map[string]interface{}
+
+    if err := json.Unmarshal(body, &response); err != nil {
+        panic(err)
+    }
+
+    return response["result"]
 
 }
 
-func callApi(method string) []byte {
+func callApi(method string) interface{} {
 
     return callApiWithParams(method, [0]string{})
 
@@ -73,44 +79,20 @@ func callApi(method string) []byte {
 
 func blockNumber() string {
 
-    body := callApi("eth_blockNumber")
+    dat := callApi("eth_blockNumber")
 
-    output := fmt.Sprintf("Res:  %s!", body)
-
-    var dat map[string]interface{}
-
-    if err := json.Unmarshal(body, &dat); err != nil {
-        panic(err)
-    }
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res2:  %s!", dat)
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res3:  %s!", dat["result"])
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("<br /><br />")
+    output := fmt.Sprintf("Latest block:  %s!", dat)
 
     return output
 }
 
 func syncing() string {
 
-    body := callApi("eth_syncing")
+    result := callApi("eth_syncing")
 
-    output := fmt.Sprintf("Res:  %s!", body)
+    output := fmt.Sprintf("<br />")
 
-    var dat map[string]interface{}
-
-    if err := json.Unmarshal(body, &dat); err != nil {
-        panic(err)
-    }
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res2:  %s!", dat)
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res3:  %s!", dat["result"])
-
-
-    output += fmt.Sprintf("<br /><br />")
-    switch vv := dat["result"].(type) {
+    switch vv := result.(type) {
 	    case bool:
 		    output += fmt.Sprintf("Not syncing")
 	    case map[string]interface {}:
@@ -125,53 +107,21 @@ func syncing() string {
     }
     output += fmt.Sprintf("<br /><br />")
 
-    // for k, v := range dat {
-    //     switch vv := v.(type) {
-    //     case string:
-    //         fmt.Println(k, "is string", vv)
-    //     case int:
-    //         fmt.Println(k, "is int", vv)
-    //     case float64:
-    //         fmt.Println(k, "is float64", vv)
-    //     case map[string]interface {}:
-		  //   output += fmt.Sprintf("<table>")
-    //         for i, u := range vv {
-			 //    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
-    //         }
-		  //   output += fmt.Sprintf("<table>")
-    //     default:
-    //         fmt.Println(k, "is of a type I don't know how to handle", reflect.TypeOf(vv))
-    //     }
-    // }
-
     return output
-
 }
 
 
 func getBlock(blockNum string) string {
 
-    body := callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
+    result := callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
 
-    output := fmt.Sprintf("Res:  %s!", body)
-
-    var dat map[string]interface{}
-
-    if err := json.Unmarshal(body, &dat); err != nil {
-        panic(err)
-    }
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res2:  %s!", dat)
-    output += fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res3:  %s!", dat["result"])
+    output := fmt.Sprintf("<br /><br />")
+    output += fmt.Sprintf("Res3:  %s!", result)
 
 
     output += fmt.Sprintf("<br /><br />")
-    switch vv := dat["result"].(type) {
-	    case bool:
-		    output += fmt.Sprintf("Not syncing")
+    switch vv := result.(type) {
 	    case map[string]interface {}:
-	        output += fmt.Sprintf("Syncing")
 		    output += fmt.Sprintf("<table>")
             for i, u := range vv {
 			    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
@@ -182,30 +132,8 @@ func getBlock(blockNum string) string {
     }
     output += fmt.Sprintf("<br /><br />")
 
-    // for k, v := range dat {
-    //     switch vv := v.(type) {
-    //     case string:
-    //         fmt.Println(k, "is string", vv)
-    //     case int:
-    //         fmt.Println(k, "is int", vv)
-    //     case float64:
-    //         fmt.Println(k, "is float64", vv)
-    //     case map[string]interface {}:
-		  //   output += fmt.Sprintf("<table>")
-    //         for i, u := range vv {
-			 //    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
-    //         }
-		  //   output += fmt.Sprintf("<table>")
-    //     default:
-    //         fmt.Println(k, "is of a type I don't know how to handle", reflect.TypeOf(vv))
-    //     }
-    // }
-
     return output
-
 }
-
-
 
 
 func handler(w http.ResponseWriter, r *http.Request) {
