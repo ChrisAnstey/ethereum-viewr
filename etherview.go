@@ -77,13 +77,11 @@ func callApi(method string) interface{} {
 
 }
 
-func blockNumber() string {
+func blockNumber() interface{} {
 
     dat := callApi("eth_blockNumber")
 
-    output := fmt.Sprintf("Latest block:  %s!", dat)
-
-    return output
+    return dat
 }
 
 func syncing() string {
@@ -138,7 +136,7 @@ func getBlock(blockNum string) string {
 
 func handler(w http.ResponseWriter, r *http.Request) {
     body := syncing()
-    body += blockNumber()
+    body += fmt.Sprintf("Res3:  %s!", blockNumber())
     body += getBlock("latest")
 
     PageVars := PageVariables{ //store the data in a struct
@@ -160,11 +158,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func status(w http.ResponseWriter, r *http.Request) {
     body := syncing()
-    body += blockNumber()
 
-    PageVars := PageVariables{ //store the data in a struct
-      Body: template.HTML(body),
-    }
+    var PageVars = struct{Body, LatestBlock interface{}}{template.HTML(body), blockNumber()}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
