@@ -217,13 +217,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
       Body: template.HTML(body),
     }
 
-    t, err := template.ParseFiles("html/layout/template.html") //parse the html file
+    t, err := template.ParseFiles("html/page/generic.html", "html/layout/template.html") //parse the html file
     if err != nil {
   	  log.Print("template parsing error: ", err)
   	}
 
   	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.Execute(w, PageVars)
+    err =t.ExecuteTemplate(w, "layout", PageVars)
     if err != nil {
   	  log.Print("template executing error: ", err)
 	}
@@ -238,13 +238,13 @@ func status(w http.ResponseWriter, r *http.Request) {
       Body: template.HTML(body),
     }
 
-    t, err := template.ParseFiles("html/layout/template.html") //parse the html file
+    t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
   	  log.Print("template parsing error: ", err)
   	}
 
   	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.Execute(w, PageVars)
+    err = t.ExecuteTemplate(w, "layout", PageVars)
     if err != nil {
   	  log.Print("template executing error: ", err)
 	}
@@ -261,13 +261,13 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
       Body: template.HTML(body),
     }
 
-    t, err := template.ParseFiles("html/layout/template.html") //parse the html file
+    t, err := template.ParseFiles("html/page/generic.html", "html/layout/template.html") //parse the html file
     if err != nil {
   	  log.Print("template parsing error: ", err)
   	}
 
   	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.Execute(w, PageVars)
+    err = t.ExecuteTemplate(w, "layout", PageVars)
     if err != nil {
   	  log.Print("template executing error: ", err)
 	}
