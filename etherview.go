@@ -250,9 +250,33 @@ func status(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func viewBlock(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	block := r.Form.Get("block")
+
+    body := "Viewing Block: " + block + " "
+    body += getBlock(block)
+
+    PageVars := PageVariables{ //store the data in a struct
+      Body: template.HTML(body),
+    }
+
+    t, err := template.ParseFiles("html/layout/template.html") //parse the html file
+    if err != nil {
+  	  log.Print("template parsing error: ", err)
+  	}
+
+  	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
+    err = t.Execute(w, PageVars)
+    if err != nil {
+  	  log.Print("template executing error: ", err)
+	}
+}
+
 
 func main() {
     http.HandleFunc("/", handler)
     http.HandleFunc("/status", status)
-    http.ListenAndServe(":8088", nil)
+    http.HandleFunc("/block", viewBlock)
+    log.Fatal(http.ListenAndServe(":8088", nil))
 }
