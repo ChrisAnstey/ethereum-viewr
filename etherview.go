@@ -3,7 +3,8 @@ package main
 import (
     "fmt"
     "net/http"
-    // "net/url"
+    "html/template"
+     // "net/url"
     "encoding/json"
     "time"
     "log"
@@ -11,6 +12,10 @@ import (
     "bytes"
     "reflect"
 )
+
+type PageVariables struct {
+	Body         template.HTML
+}
 
 type Request1 struct {
     Jsonrpc   string      `json:"jsonrpc"`
@@ -204,26 +209,50 @@ func getBlock() string {
 
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, `<!doctype html>
-		<html lang="en">
-		<head>
-		  <meta charset="utf-8">
-		  <title>Etherview</title>
-		</head>
-		<body>
-	`)
-
     body := syncing()
     body += blockNumber()
     body += getBlock()
 
-    fmt.Fprintf(w, "%s", body)
+    PageVars := PageVariables{ //store the data in a struct
+      Body: template.HTML(body),
+    }
 
-	fmt.Fprintf(w, `</body></html>`)
+    t, err := template.ParseFiles("html/layout/template.html") //parse the html file
+    if err != nil {
+  	  log.Print("template parsing error: ", err)
+  	}
 
+  	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
+    err = t.Execute(w, PageVars)
+    if err != nil {
+  	  log.Print("template executing error: ", err)
+	}
 }
+
+
+func status(w http.ResponseWriter, r *http.Request) {
+    body := syncing()
+    body += blockNumber()
+
+    PageVars := PageVariables{ //store the data in a struct
+      Body: template.HTML(body),
+    }
+
+    t, err := template.ParseFiles("html/layout/template.html") //parse the html file
+    if err != nil {
+  	  log.Print("template parsing error: ", err)
+  	}
+
+  	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
+    err = t.Execute(w, PageVars)
+    if err != nil {
+  	  log.Print("template executing error: ", err)
+	}
+}
+
 
 func main() {
     http.HandleFunc("/", handler)
+    http.HandleFunc("/status", status)
     http.ListenAndServe(":8088", nil)
 }
