@@ -4,140 +4,20 @@ import (
     "fmt"
     "net/http"
     "html/template"
-     // "net/url"
-    "encoding/json"
-    "time"
     "log"
-    "io/ioutil"
-    "bytes"
-    "reflect"
+    "./lib"
 )
 
 type PageVariables struct {
 	Body         template.HTML
 }
 
-type Request1 struct {
-    Jsonrpc   string      `json:"jsonrpc"`
-    Method   string `json:"method"`
-    Id   int `json:"id"`
-    Params interface{} `json:"params"`
-}
-
-func callApiWithParams(method string, params interface{}) interface{} {
-
-    url := "http://192.168.1.145:8545"
-    url = "http://127.0.0.1:8545"
-
-    queryData := &Request1{
-        Jsonrpc:   "2.0",
-        Method: method,
-        Id: 1,
-        Params: params,
-    }
-    queryJson, _ := json.Marshal(queryData)
-    // fmt.Println(string(queryJson))
-
-    ethClient := http.Client{
-        Timeout: time.Second * 2, // Maximum of 2 secs
-    }
-
-    req, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(queryJson))
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    req.Header.Set("User-Agent", "Etherview")
-
-    // make the request
-    res, getErr := ethClient.Do(req)
-    if getErr != nil {
-        log.Fatal(getErr)
-    }
-
-    // read in the result
-    body, readErr := ioutil.ReadAll(res.Body)
-    if readErr != nil {
-        log.Fatal(readErr)
-    }
-
-    var response map[string]interface{}
-
-    if err := json.Unmarshal(body, &response); err != nil {
-        panic(err)
-    }
-
-    return response["result"]
-
-}
-
-func callApi(method string) interface{} {
-
-    return callApiWithParams(method, [0]string{})
-
-}
-
-func blockNumber() interface{} {
-
-    dat := callApi("eth_blockNumber")
-
-    return dat
-}
-
-func syncing() string {
-
-    result := callApi("eth_syncing")
-
-    output := fmt.Sprintf("<br />")
-
-    switch vv := result.(type) {
-	    case bool:
-		    output += fmt.Sprintf("Not syncing")
-	    case map[string]interface {}:
-	        output += fmt.Sprintf("Syncing")
-		    output += fmt.Sprintf("<table>")
-            for i, u := range vv {
-			    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
-            }
-		    output += fmt.Sprintf("<table>")
-	    default:
-	        output += fmt.Sprintf("is of a type I don't know how to handle", reflect.TypeOf(vv))
-    }
-    output += fmt.Sprintf("<br /><br />")
-
-    return output
-}
-
-
-func getBlock(blockNum string) string {
-
-    result := callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
-
-    output := fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res3:  %s!", result)
-
-
-    output += fmt.Sprintf("<br /><br />")
-    switch vv := result.(type) {
-	    case map[string]interface {}:
-		    output += fmt.Sprintf("<table>")
-            for i, u := range vv {
-			    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
-            }
-		    output += fmt.Sprintf("<table>")
-	    default:
-	        output += fmt.Sprintf("is of a type I don't know how to handle", reflect.TypeOf(vv))
-    }
-    output += fmt.Sprintf("<br /><br />")
-
-    return output
-}
-
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    body := syncing()
-    body += fmt.Sprintf("Res3:  %s!", blockNumber())
-    body += getBlock("latest")
+    c := lib.Client{}
+    body := c.Syncing()
+    body += fmt.Sprintf("Res3:  %s!", c.BlockNumber())
+    body += c.GetBlock("latest")
 
     PageVars := PageVariables{ //store the data in a struct
       Body: template.HTML(body),
@@ -157,9 +37,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 
 func status(w http.ResponseWriter, r *http.Request) {
-    body := syncing()
+    c := lib.Client{}
+    body := c.Syncing()
 
-    var PageVars = struct{Body, LatestBlock interface{}}{template.HTML(body), blockNumber()}
+    var PageVars = struct{Body, LatestBlock interface{}}{template.HTML(body), c.BlockNumber()}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
@@ -174,11 +55,12 @@ func status(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewBlock(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	block := r.Form.Get("block")
+    r.ParseForm()
+    block := r.Form.Get("block")
 
     body := "Viewing Block: " + block + " "
-    body += getBlock(block)
+    c := lib.Client{}
+    body += c.GetBlock(block)
 
     PageVars := PageVariables{ //store the data in a struct
       Body: template.HTML(body),
@@ -192,8 +74,8 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
   	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
     err = t.ExecuteTemplate(w, "layout", PageVars)
     if err != nil {
-  	  log.Print("template executing error: ", err)
-	}
+    	  log.Print("template executing error: ", err)
+  	}
 }
 
 
