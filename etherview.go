@@ -5,19 +5,22 @@ import (
     "net/http"
     "html/template"
     "log"
-    "./lib"
+    "github.com/ChrisAnstey/etherview/lib"
 )
 
 type PageVariables struct {
 	Body         template.HTML
 }
 
+var gethClient = lib.Client{
+      Url: "http://192.168.1.145:8545",
+    }
+
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    c := lib.Client{}
-    body := c.Syncing()
-    body += fmt.Sprintf("Res3:  %s!", c.BlockNumber())
-    body += c.GetBlock("latest")
+    body := gethClient.Syncing()
+    body += fmt.Sprintf("Res3:  %s!", gethClient.BlockNumber())
+    body += gethClient.GetBlock("latest")
 
     PageVars := PageVariables{ //store the data in a struct
       Body: template.HTML(body),
@@ -37,10 +40,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 
 func status(w http.ResponseWriter, r *http.Request) {
-    c := lib.Client{}
-    body := c.Syncing()
+    body := gethClient.Syncing()
 
-    var PageVars = struct{Body, LatestBlock interface{}}{template.HTML(body), c.BlockNumber()}
+    var PageVars = struct{Body, LatestBlock interface{}}{template.HTML(body), gethClient.BlockNumber()}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
@@ -59,8 +61,7 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
     block := r.Form.Get("block")
 
     body := "Viewing Block: " + block + " "
-    c := lib.Client{}
-    body += c.GetBlock(block)
+    body += gethClient.GetBlock(block)
 
     PageVars := PageVariables{ //store the data in a struct
       Body: template.HTML(body),

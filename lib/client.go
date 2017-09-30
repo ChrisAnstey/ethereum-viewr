@@ -20,12 +20,10 @@ type Request1 struct {
 }
 
 type Client struct{
+    Url string
 }
 
 func (c *Client) callApiWithParams(method string, params interface{}) interface{} {
-
-    url := "http://192.168.1.145:8545"
-    // url = "http://127.0.0.1:8545"
 
     queryData := &Request1{
         Jsonrpc:   "2.0",
@@ -40,7 +38,7 @@ func (c *Client) callApiWithParams(method string, params interface{}) interface{
         Timeout: time.Second * 2, // Maximum of 2 secs
     }
 
-    req, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(queryJson))
+    req, err := http.NewRequest(http.MethodGet, c.Url, bytes.NewBuffer(queryJson))
     if err != nil {
         log.Fatal(err)
     }
