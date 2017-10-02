@@ -144,6 +144,13 @@ func (c *Client) GetBlock(blockNum string) string {
     return output
 }
 
+func (c *Client) GetBlockData(blockNum string)  interface {} {
+
+    result := c.callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
+
+    return result
+}
+
 
 func (c *Client) GetTxn(txNum string) interface{} {
     result := c.callApiWithParams("eth_getTransactionByHash", []interface{}{txNum})

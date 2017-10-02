@@ -60,14 +60,12 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
     block := r.Form.Get("block")
 
-    body := "Viewing Block: " + block + " "
-    body += gethClient.GetBlock(block)
+    blockData := gethClient.GetBlockData(block)
+    var DataKeys = [11]string{"difficulty", "gasLimit", "gasUsed", "hash", "miner", "nonce", "number", "parentHash", "size", "timestamp", "transactionsRoot"}
 
-    PageVars := PageVariables{ //store the data in a struct
-      Body: template.HTML(body),
-    }
+    var PageVars = struct{ BlockData interface{}; DataKeys [11]string}{blockData, DataKeys}
 
-    t, err := template.ParseFiles("html/page/generic.html", "html/layout/template.html") //parse the html file
+    t, err := template.ParseFiles("html/page/block.html", "html/layout/template.html") //parse the html file
     if err != nil {
   	  log.Print("template parsing error: ", err)
   	}
