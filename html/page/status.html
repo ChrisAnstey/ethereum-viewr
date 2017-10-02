@@ -1,4 +1,6 @@
 {{define "content"}}
 {{.Body}}
+Is syncing: {{.Syncing}}
+<br />
 View latest block: <a href="block?block={{.LatestBlock}}">{{.LatestBlock}}</a>
 {{end}}

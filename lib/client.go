@@ -104,6 +104,21 @@ func (c *Client) Syncing() string {
     return output
 }
 
+func (c *Client) IsSyncing() bool {
+
+    result := c.callApi("eth_syncing")
+
+    syncing := false
+
+    switch result.(type) {
+        case map[string]interface {}:
+            syncing = true
+    }
+
+    return syncing
+
+}
+
 
 func (c *Client) GetBlock(blockNum string) string {
 

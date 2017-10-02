@@ -42,7 +42,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func status(w http.ResponseWriter, r *http.Request) {
     body := gethClient.Syncing()
 
-    var PageVars = struct{Body, LatestBlock interface{}}{template.HTML(body), gethClient.BlockNumber()}
+    var PageVars = struct{Body, Syncing, LatestBlock interface{}}{template.HTML(body), gethClient.IsSyncing(), gethClient.BlockNumber()}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
