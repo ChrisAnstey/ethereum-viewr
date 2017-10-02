@@ -79,10 +79,30 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
   	}
 }
 
+func viewTransaction(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()
+    tx := r.Form.Get("tx")
+    txData := gethClient.GetTxn(tx)
+
+    var PageVars = struct{TxnData interface{}}{txData}
+
+    t, err := template.ParseFiles("html/page/transaction.html", "html/layout/template.html") //parse the html files
+    if err != nil {
+      log.Print("template parsing error: ", err)
+    }
+
+    //execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
+    err = t.ExecuteTemplate(w, "layout", PageVars)
+    if err != nil {
+      log.Print("template executing error: ", err)
+    }
+}
+
 
 func main() {
     http.HandleFunc("/", handler)
     http.HandleFunc("/status", status)
     http.HandleFunc("/block", viewBlock)
+    http.HandleFunc("/tx", viewTransaction)
     log.Fatal(http.ListenAndServe(":8088", nil))
 }

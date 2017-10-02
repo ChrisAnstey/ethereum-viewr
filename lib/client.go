@@ -130,3 +130,9 @@ func (c *Client) GetBlock(blockNum string) string {
 }
 
 
+func (c *Client) GetTxn(txNum string) interface{} {
+    result := c.callApiWithParams("eth_getTransactionByHash", []interface{}{txNum})
+
+    return result
+}
+

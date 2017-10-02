@@ -1,0 +1,11 @@
+{{define "content"}}
+	<h3>Transaction: {{.TxnData.hash}}</h3>
+	From block: <a href="block?block={{.TxnData.blockNumber}}">{{.TxnData.blockNumber}}</a>
+
+	<h4>Data</h4>
+	<table>
+		{{range $key, $value := .TxnData}}
+			<tr><td>{{ $key }}</td><td>{{ $value }}</td></tr>
+		{{end}}
+	</table>
+{{end}}
