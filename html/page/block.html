@@ -5,8 +5,8 @@
 			<tr>
 				<td>{{ $key }}</td>
 				<td>
-					{{if eq $key "size"}}
-						{{ index $.BlockData $key }}
+					{{if eq $key "parentHash"}}
+						<a href="block?blockHash={{ index $.BlockData $key }}">{{ index $.BlockData $key }}</a>
 					{{else}}
 						{{ index $.BlockData $key }}
 					{{end}}
