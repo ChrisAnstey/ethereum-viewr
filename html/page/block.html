@@ -17,9 +17,9 @@
 
 	<h3>Transactions</h3>
 	<table>
-	    <tr><th>From</th><th>To</th><th>Value</th></tr>
+	    <tr><th>Hash</th><th>From</th><th>To</th><th>Value</th></tr>
 		{{ range $key, $value := .BlockData.transactions }}
-		   <tr><td>{{ printf "%.10s" $value.from }}...</td><td>{{ printf "%.10s" $value.to }}...</td><td>{{ printf "%s" $value.value }}</td></tr>
+		   <tr><td><a href="tx?tx={{ $value.hash }}">{{ printf "%.10s" $value.hash }}...</a></td><td>{{ printf "%.10s" $value.from }}...</td><td>{{ printf "%.10s" $value.to }}...</td><td>{{ printf "%s" $value.value }}</td></tr>
 		{{ end }}
 	</table>
 {{ end }}
