@@ -6,7 +6,7 @@ View latest block: <a href="block?block={{.LatestBlock}}">{{.LatestBlock}}</a>
 <br />
 <br />
 
-<table>
+<table class="table table-bordered">
 {{ range $key, $value := .SyncData }}
 	<tr>
 		<td>{{ $key }}</td>

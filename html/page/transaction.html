@@ -3,7 +3,7 @@
 	From block: <a href="block?block={{.TxnData.blockNumber}}">{{.TxnData.blockNumber}}</a>
 
 	<h4>Data</h4>
-	<table>
+	<table class="table table-bordered">
 		{{range $key, $value := .TxnData}}
 			<tr><td>{{ $key }}</td><td>{{ $value }}</td></tr>
 		{{end}}
