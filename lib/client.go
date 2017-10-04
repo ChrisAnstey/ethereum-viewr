@@ -1,7 +1,6 @@
 package lib
 
 import (
-    "fmt"
     "net/http"
      // "net/url"
     "encoding/json"
@@ -9,7 +8,6 @@ import (
     "log"
     "io/ioutil"
     "bytes"
-    "reflect"
 )
 
 type Request1 struct {
@@ -75,73 +73,27 @@ func (c *Client) callApi(method string) interface{} {
 
 func (c *Client) BlockNumber() interface{} {
 
-    dat := c.callApi("eth_blockNumber")
+    result := c.callApi("eth_blockNumber")
 
-    return dat
+    return result
 }
 
-func (c *Client) Syncing() string {
+
+func (c *Client) IsSyncing() (bool, map[string]interface {}) {
 
     result := c.callApi("eth_syncing")
 
-    output := fmt.Sprintf("<br />")
-
-    switch vv := result.(type) {
-	    case bool:
-		    output += fmt.Sprintf("Not syncing")
-	    case map[string]interface {}:
-	        output += fmt.Sprintf("Syncing")
-		    output += fmt.Sprintf("<table>")
-            for i, u := range vv {
-			    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
-            }
-		    output += fmt.Sprintf("<table>")
-	    default:
-	        output += fmt.Sprintf("is of a type I don't know how to handle", reflect.TypeOf(vv))
-    }
-    output += fmt.Sprintf("<br /><br />")
-
-    return output
-}
-
-func (c *Client) IsSyncing() bool {
-
-    result := c.callApi("eth_syncing")
-
+    var data map[string]interface {};
     syncing := false
 
-    switch result.(type) {
+    switch  resultValue := result.(type) {
         case map[string]interface {}:
             syncing = true
+            data = resultValue
     }
 
-    return syncing
+    return syncing, data
 
-}
-
-
-func (c *Client) GetBlock(blockNum string) string {
-
-    result := c.callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
-
-    output := fmt.Sprintf("<br /><br />")
-    output += fmt.Sprintf("Res3:  %s!", result)
-
-
-    output += fmt.Sprintf("<br /><br />")
-    switch vv := result.(type) {
-	    case map[string]interface {}:
-		    output += fmt.Sprintf("<table>")
-            for i, u := range vv {
-			    output += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", i, u)
-            }
-		    output += fmt.Sprintf("<table>")
-	    default:
-	        output += fmt.Sprintf("is of a type I don't know how to handle", reflect.TypeOf(vv))
-    }
-    output += fmt.Sprintf("<br /><br />")
-
-    return output
 }
 
 func (c *Client) GetBlockData(blockNum string)  interface {} {

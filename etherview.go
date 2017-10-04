@@ -1,7 +1,6 @@
 package main
 
 import (
-    "fmt"
     "net/http"
     "html/template"
     "log"
@@ -16,33 +15,10 @@ var gethClient = lib.Client{
       Url: "http://192.168.1.145:8545",
     }
 
-
-func handler(w http.ResponseWriter, r *http.Request) {
-    body := gethClient.Syncing()
-    body += fmt.Sprintf("Res3:  %s!", gethClient.BlockNumber())
-    body += gethClient.GetBlock("latest")
-
-    PageVars := PageVariables{ //store the data in a struct
-      Body: template.HTML(body),
-    }
-
-    t, err := template.ParseFiles("html/page/generic.html", "html/layout/template.html") //parse the html file
-    if err != nil {
-  	  log.Print("template parsing error: ", err)
-  	}
-
-  	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err =t.ExecuteTemplate(w, "layout", PageVars)
-    if err != nil {
-  	  log.Print("template executing error: ", err)
-	}
-}
-
-
 func status(w http.ResponseWriter, r *http.Request) {
-    body := gethClient.Syncing()
+    status, syncData := gethClient.IsSyncing()
 
-    var PageVars = struct{Body, Syncing, LatestBlock interface{}}{template.HTML(body), gethClient.IsSyncing(), gethClient.BlockNumber()}
+    var PageVars = struct{Syncing, LatestBlock interface{}; SyncData map[string]interface{}}{status, gethClient.BlockNumber(), syncData}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
@@ -109,7 +85,7 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
-    http.HandleFunc("/", handler)
+    http.HandleFunc("/", status)
     http.HandleFunc("/status", status)
     http.HandleFunc("/block", viewBlock)
     http.HandleFunc("/tx", viewTransaction)
