@@ -132,20 +132,8 @@ func extractBlockData(input interface{}) Block {
                 data [i] = v
             case []interface {}:
                 if i == "transactions" {
-                    transactions := make(map[string]Transaction)
-                    for _, tu := range u.([]interface {}) {
-                        tdata := make(map[string]string)
-                        for tti, ttu := range tu.(map[string]interface {}) {
-                            if  ttus, ok := ttu.(string); ok {
-                                tdata[tti] = ttus
-                            }
-                        }
-
-                        transactions[tdata["hash"]] = Transaction{tdata["hash"], tdata}
-                    }
-                    response.Transactions = transactions
+                    response.Transactions = extractTransactions(u)
                 } else {
-
                     fmt.Printf(i, "unexpected type %T", v)
                 }
             default:
@@ -158,7 +146,24 @@ func extractBlockData(input interface{}) Block {
     return response
 }
 
+func extractTransactions(input interface{}) map[string]Transaction {
+    transactions := make(map[string]Transaction)
+    for _, tu := range input.([]interface {}) {
+        transaction := extractTransactionData(tu)
+        transactions[transaction.Data["hash"]] = transaction
+    }
+    return transactions
+}
 
+func extractTransactionData(input interface{}) Transaction {
+    tdata := make(map[string]string)
+    for ti, tu := range input.(map[string]interface {}) {
+        if  tus, ok := tu.(string); ok {
+            tdata[ti] = tus
+        }
+    }
+    return Transaction{tdata["hash"], tdata}
+}
 
 
 func (c *Client) GetTxn(txNum string) interface{} {
