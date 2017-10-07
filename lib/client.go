@@ -166,9 +166,9 @@ func extractTransactionData(input interface{}) Transaction {
 }
 
 
-func (c *Client) GetTxn(txNum string) interface{} {
+func (c *Client) GetTxn(txNum string) Transaction {
     result := c.callApiWithParams("eth_getTransactionByHash", []interface{}{txNum})
 
-    return result
+    return extractTransactionData(result)
 }
 

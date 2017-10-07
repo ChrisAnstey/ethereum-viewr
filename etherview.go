@@ -67,7 +67,7 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
     tx := r.Form.Get("tx")
     txData := gethClient.GetTxn(tx)
 
-    var PageVars = struct{TxnData interface{}}{txData}
+    var PageVars = struct{Txn lib.Transaction}{txData}
 
     t, err := template.ParseFiles("html/page/transaction.html", "html/layout/template.html") //parse the html files
     if err != nil {
