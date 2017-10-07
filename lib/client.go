@@ -8,6 +8,7 @@ import (
     "log"
     "io/ioutil"
     "bytes"
+    "fmt"
 )
 
 type Request1 struct {
@@ -20,6 +21,18 @@ type Request1 struct {
 type Client struct{
     Url string
 }
+
+type Transaction struct {
+    Hash string
+    Data map[string]string
+}
+
+type Block struct {
+    Hash string
+    Data map[string]string
+    Transactions map[string]Transaction
+}
+
 
 func (c *Client) callApiWithParams(method string, params interface{}) interface{} {
 
@@ -96,17 +109,56 @@ func (c *Client) IsSyncing() (bool, map[string]interface {}) {
 
 }
 
-func (c *Client) GetBlockData(blockNum string)  interface {} {
+func (c *Client) GetBlockDataByNumber(blockNum string)  Block {
     result := c.callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
 
-    return result
+    return extractBlockData(result)
 }
 
-func (c *Client) GetBlockDataByHash(blockHash string)  interface {} {
+func (c *Client) GetBlockDataByHash(blockHash string) Block {
     result := c.callApiWithParams("eth_getBlockByHash", []interface{}{blockHash, true})
 
-    return result
+    return extractBlockData(result)
 }
+
+func extractBlockData(input interface{}) Block {
+
+    var response Block
+    data := make(map[string]string)
+
+    for i, u := range input.(map[string]interface {}) {
+        switch v := u.(type) {
+            case string:
+                data [i] = v
+            case []interface {}:
+                if i == "transactions" {
+                    transactions := make(map[string]Transaction)
+                    for _, tu := range u.([]interface {}) {
+                        tdata := make(map[string]string)
+                        for tti, ttu := range tu.(map[string]interface {}) {
+                            if  ttus, ok := ttu.(string); ok {
+                                tdata[tti] = ttus
+                            }
+                        }
+
+                        transactions[tdata["hash"]] = Transaction{tdata["hash"], tdata}
+                    }
+                    response.Transactions = transactions
+                } else {
+
+                    fmt.Printf(i, "unexpected type %T", v)
+                }
+            default:
+                fmt.Printf(i, "unexpected type %T", v)
+        }
+    }
+    response.Data = data
+    response.Hash = data["hash"]
+
+    return response
+}
+
+
 
 
 func (c *Client) GetTxn(txNum string) interface{} {

@@ -1,14 +1,16 @@
 {{define "content"}}
-	<h3>Block: {{.BlockData.number}}</h3>
+	<h3>Block: {{ .BlockData.Data.number }}</h3>
 	<table class="table table-bordered">
-		{{ range $key := .DataKeys }}
+		{{ range $key, $value := .BlockData.Data }}
 			<tr>
 				<td>{{ $key }}</td>
 				<td>
 					{{if eq $key "parentHash"}}
-						<a href="block?blockHash={{ index $.BlockData $key }}">{{ index $.BlockData $key }}</a>
+						<a href="block?blockHash={{ $value }}">{{ $value }}</a>
+					{{else if eq $key "logsBloom"}}
+						{{  printf "%.60s" $value }}...
 					{{else}}
-						{{ index $.BlockData $key }}
+						{{ $value }}
 					{{end}}
 				</td>
 			</tr>
@@ -23,12 +25,12 @@
 			<th>To</th>
 			<th>Value</th>
 		</tr>
-		{{ range $key, $value := .BlockData.transactions }}
+		{{ range $key, $value := .BlockData.Transactions }}
 			<tr>
-				<td><a href="tx?tx={{ $value.hash }}">{{ printf "%.20s" $value.hash }}...</a></td>
-				<td>{{ printf "%.20s" $value.from }}...</td>
-				<td>{{ printf "%.20s" $value.to }}...</td>
-				<td>{{ printf "%s" $value.value }}</td>
+				<td><a href="tx?tx={{ $key }}">{{ printf "%.20s" $key }}...</a></td>
+				<td>{{ printf "%.20s" $value.Data.from }}...</td>
+				<td>{{  printf "%.20s" $value.Data.to }}...</td>
+				<td>{{ $value.Data.value }}</td>
 			</tr>
 		{{ end }}
 	</table>

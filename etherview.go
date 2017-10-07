@@ -37,20 +37,18 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
 
     // get by number
     var block string
-    var blockData interface{}
+    var blockData lib.Block
+
 
     // check if we got a number
     if block = r.Form.Get("block"); block != "" {
-	    blockData = gethClient.GetBlockData(block)
+      blockData = gethClient.GetBlockDataByNumber(block)
     } else {
 	    // otherwise, try hash
-	    blockData = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
+      blockData = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
     }
 
-    // the values we'd like to show
-    var DataKeys = [11]string{"difficulty", "gasLimit", "gasUsed", "hash", "miner", "nonce", "number", "parentHash", "size", "timestamp", "transactionsRoot"}
-
-    var PageVars = struct{ BlockData interface{}; DataKeys [11]string}{blockData, DataKeys}
+    var PageVars = struct{BlockData lib.Block}{blockData}
 
     t, err := template.ParseFiles("html/page/block.html", "html/layout/template.html") //parse the html file
     if err != nil {
