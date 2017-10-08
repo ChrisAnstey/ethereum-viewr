@@ -18,7 +18,7 @@ var gethClient = lib.Client{
 func status(w http.ResponseWriter, r *http.Request) {
     status, syncData := gethClient.IsSyncing()
 
-    var PageVars = struct{Syncing, LatestBlock interface{}; SyncData map[string]interface{}}{status, gethClient.BlockNumber(), syncData}
+    var PageVars = struct{PageTitle string; Syncing, LatestBlock interface{}; SyncData map[string]interface{}}{"Status", status, gethClient.BlockNumber(), syncData}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
@@ -48,7 +48,7 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
       blockData = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
     }
 
-    var PageVars = struct{BlockData lib.Block}{blockData}
+    var PageVars = struct{PageTitle string; BlockData lib.Block}{"View Block", blockData}
 
     t, err := template.ParseFiles("html/page/block.html", "html/layout/template.html") //parse the html file
     if err != nil {
@@ -67,7 +67,7 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
     tx := r.Form.Get("tx")
     txData := gethClient.GetTxn(tx)
 
-    var PageVars = struct{Txn lib.Transaction}{txData}
+    var PageVars = struct{PageTitle string; Txn lib.Transaction}{"View Transaction", txData}
 
     t, err := template.ParseFiles("html/page/transaction.html", "html/layout/template.html") //parse the html files
     if err != nil {
