@@ -12,6 +12,7 @@ import (
     "strconv"
     "github.com/fatih/camelcase"
     "strings"
+    "math"
 )
 
 type Request1 struct {
@@ -27,6 +28,7 @@ type Client struct{
 
 type Transaction struct {
     Hash string
+    Value float64
     Data map[string]string
 }
 
@@ -170,7 +172,8 @@ func extractTransactionData(input interface{}) Transaction {
             tdata[ti] = tus
         }
     }
-    return Transaction{tdata["hash"], tdata}
+    valueDec, _ := strconv.ParseInt(tdata["value"], 0, 64)
+    return Transaction{tdata["hash"], float64(valueDec) / math.Pow10(18), tdata}
 }
 
 

@@ -30,8 +30,16 @@
 			<tr>
 				<td><a href="tx?tx={{ $key }}">{{ printf "%.20s" $key }}...</a></td>
 				<td>{{ printf "%.20s" $value.Data.from }}...</td>
-				<td>{{  printf "%.20s" $value.Data.to }}...</td>
-				<td>{{ $value.Data.value }}</td>
+				<td>{{ printf "%.20s" $value.Data.to }}...</td>
+				<td>
+					<span style="
+					{{ if eq 0.0 $value.Value }}
+						color:#999;
+					{{end}}
+					">
+					{{ printf "%.6f" $value.Value }}
+					</span>
+				</td>
 			</tr>
 		{{ end }}
 	</table>

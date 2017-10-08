@@ -4,6 +4,7 @@
 
 	<h4>Data</h4>
 	<table class="table table-bordered">
+		<tr><td>Value</td><td>{{ .Txn.Value }}</td></tr>
 		{{range $key, $value := .Txn.Data}}
 			<tr><td>{{ $key }}</td><td>{{ $value }}</td></tr>
 		{{end}}
