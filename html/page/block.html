@@ -1,14 +1,15 @@
 {{define "content"}}
-	<h3>Block: {{ .BlockData.Data.number }}</h3>
+	<h3>Block: {{ .BlockData.Number }}</h3>
+	<div>{{ .BlockData.Timestamp.Format "Jan 02, 2006 15:04:05 UTC" }}</div>
 	<table class="table table-bordered">
 		{{ range $key, $value := .BlockData.Data }}
 			<tr>
 				<td>{{ $key }}</td>
 				<td>
-					{{if eq $key "parentHash"}}
+					{{if eq $key "Parent Hash"}}
 						<a href="block?blockHash={{ $value }}">{{ $value }}</a>
-					{{else if eq $key "logsBloom"}}
-						{{  printf "%.60s" $value }}...
+					{{else if eq $key "Logs Bloom"}}
+						{{  printf "%.64s" $value }}...
 					{{else}}
 						{{ $value }}
 					{{end}}

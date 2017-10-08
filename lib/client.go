@@ -9,6 +9,9 @@ import (
     "io/ioutil"
     "bytes"
     "fmt"
+    "strconv"
+    "github.com/fatih/camelcase"
+    "strings"
 )
 
 type Request1 struct {
@@ -29,6 +32,8 @@ type Transaction struct {
 
 type Block struct {
     Hash string
+    Number int64
+    Timestamp time.Time
     Data map[string]string
     Transactions map[string]Transaction
 }
@@ -129,7 +134,7 @@ func extractBlockData(input interface{}) Block {
     for i, u := range input.(map[string]interface {}) {
         switch v := u.(type) {
             case string:
-                data [i] = v
+                data [strings.Title(strings.Join(camelcase.Split(i), " "))] = v
             case []interface {}:
                 if i == "transactions" {
                     response.Transactions = extractTransactions(u)
@@ -141,7 +146,10 @@ func extractBlockData(input interface{}) Block {
         }
     }
     response.Data = data
-    response.Hash = data["hash"]
+    response.Hash = data["Hash"]
+    response.Number, _ = strconv.ParseInt(data["Number"], 0, 64)
+    timestamp, _ := strconv.ParseInt(data["Timestamp"], 0, 64)
+    response.Timestamp = time.Unix(timestamp, 0)
 
     return response
 }
