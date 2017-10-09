@@ -1,5 +1,5 @@
 {{define "content"}}
-Is syncing: {{.Syncing}}
+Is syncing: {{.SyncData.Status}}
 <br />
 <br />
 View latest block: <a href="block?block={{.LatestBlock}}">{{.LatestBlock}}</a>
@@ -7,18 +7,17 @@ View latest block: <a href="block?block={{.LatestBlock}}">{{.LatestBlock}}</a>
 <br />
 
 <table class="table table-bordered">
-{{ range $key, $value := .SyncData }}
-	<tr>
-		<td>{{ $key }}</td>
-		<td>
-			{{if eq $key "currentBlock"}}
-				<a href="block?block={{ $value }}">{{ $value }}</a>
-			{{else}}
-				{{ $value }}
-			{{end}}
-		</td>
-	</tr>
-{{ end }}
+	{{range $key, $value := .SyncData.Data}}
+		<tr>
+			<td>{{ $key }}</td>
+			<td>
+				{{if eq $key "Current Block"}}
+					<a href="block?block={{ $value }}">{{ $value }}</a>
+				{{else}}
+					{{ $value }}
+				{{end}}
+			</td>
+		</tr>
+	{{end}}
 </table>
-
 {{end}}

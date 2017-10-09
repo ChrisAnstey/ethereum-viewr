@@ -16,9 +16,9 @@ var gethClient = lib.Client{
     }
 
 func status(w http.ResponseWriter, r *http.Request) {
-    status, syncData := gethClient.IsSyncing()
+    syncData := gethClient.IsSyncing()
 
-    var PageVars = struct{PageTitle string; Syncing, LatestBlock interface{}; SyncData map[string]interface{}}{"Status", status, gethClient.BlockNumber(), syncData}
+    var PageVars = struct{PageTitle string; LatestBlock interface{}; SyncData lib.EthSyncingResponse}{"Status", gethClient.BlockNumber(), syncData}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {

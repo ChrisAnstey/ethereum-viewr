@@ -26,6 +26,11 @@ type Client struct{
     Url string
 }
 
+type EthSyncingResponse struct{
+    Status bool
+    Data   map[string]string
+}
+
 type ApiResponse struct {
 	Jsonrpc string      `json:"jsonrpc"`
 	Id      interface{} `json:"id"`
@@ -45,7 +50,6 @@ type Block struct {
     Data map[string]string
     Transactions map[string]Transaction
 }
-
 
 func (c *Client) callApiWithParams(method string, params interface{}) interface{} {
 
@@ -105,20 +109,26 @@ func (c *Client) BlockNumber() interface{} {
 }
 
 
-func (c *Client) IsSyncing() (bool, map[string]interface {}) {
+func (c *Client) IsSyncing() EthSyncingResponse {
 
     result := c.callApi("eth_syncing")
 
-    var data map[string]interface {};
-    syncing := false
+    var response EthSyncingResponse
+    response.Status = false
 
-    switch  resultValue := result.(type) {
+    switch v := result.(type) {
         case map[string]interface {}:
-            syncing = true
-            data = resultValue
+		    response.Status = true
+		    data := make(map[string]string)
+		    for ti, tu := range v {
+		        if  tus, ok := tu.(string); ok {
+		            data[humanise(ti)] = tus
+		        }
+		    }
+		    response.Data = data
     }
 
-    return syncing, data
+    return response
 
 }
 
