@@ -59,7 +59,7 @@ func (c *Client) callApiWithParams(method string, params interface{}) interface{
     // fmt.Println(string(queryJson))
 
     ethClient := http.Client{
-        Timeout: time.Second * 2, // Maximum of 2 secs
+        Timeout: time.Second * 5, // Maximum of 5 secs
     }
 
     req, err := http.NewRequest(http.MethodGet, c.Url, bytes.NewBuffer(queryJson))
