@@ -26,6 +26,12 @@ type Client struct{
     Url string
 }
 
+type ApiResponse struct {
+	Jsonrpc string      `json:"jsonrpc"`
+	Id      interface{} `json:"id"`
+	Result  interface{} `json:"result,omitempty"`
+}
+
 type Transaction struct {
     Hash string
     Value float64
@@ -75,13 +81,13 @@ func (c *Client) callApiWithParams(method string, params interface{}) interface{
         log.Fatal(readErr)
     }
 
-    var response map[string]interface{}
+    var response ApiResponse
 
     if err := json.Unmarshal(body, &response); err != nil {
         panic(err)
     }
 
-    return response["result"]
+    return response.Result
 
 }
 
