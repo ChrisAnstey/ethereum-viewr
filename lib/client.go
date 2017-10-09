@@ -142,7 +142,7 @@ func extractBlockData(input interface{}) Block {
     for i, u := range input.(map[string]interface {}) {
         switch v := u.(type) {
             case string:
-                data [strings.Title(strings.Join(camelcase.Split(i), " "))] = v
+                data [humanise(i)] = v
             case []interface {}:
                 if i == "transactions" {
                     response.Transactions = extractTransactions(u)
@@ -180,6 +180,10 @@ func extractTransactionData(input interface{}) Transaction {
     }
     valueDec, _ := strconv.ParseInt(tdata["value"], 0, 64)
     return Transaction{tdata["hash"], float64(valueDec) / math.Pow10(18), tdata}
+}
+
+func humanise(input string) string {
+	return strings.Title(strings.Join(camelcase.Split(input), " "))
 }
 
 
