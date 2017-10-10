@@ -62,7 +62,7 @@ type Account struct {
     Balance float64
 }
 
-func (c *Client) callApiWithParams(method string, params interface{}) interface{} {
+func (c *Client) callApiWithParams(method string, params interface{}) (interface{}, error) {
 
     queryData := &Request1{
         Jsonrpc:   "2.0",
@@ -87,7 +87,7 @@ func (c *Client) callApiWithParams(method string, params interface{}) interface{
     // make the request
     res, getErr := ethClient.Do(req)
     if getErr != nil {
-        log.Fatal(getErr)
+        return nil, getErr
     }
 
     // read in the result
@@ -102,27 +102,26 @@ func (c *Client) callApiWithParams(method string, params interface{}) interface{
         panic(err)
     }
 
-    return response.Result
+    return response.Result, nil
 
 }
 
-func (c *Client) callApi(method string) interface{} {
+func (c *Client) callApi(method string) (interface{}, error) {
 
     return c.callApiWithParams(method, [0]string{})
 
 }
 
-func (c *Client) BlockNumber() interface{} {
+func (c *Client) BlockNumber() (interface{}, error) {
 
-    result := c.callApi("eth_blockNumber")
+    return c.callApi("eth_blockNumber")
 
-    return result
 }
 
 
-func (c *Client) IsSyncing() EthSyncingResponse {
+func (c *Client) IsSyncing() (EthSyncingResponse, error) {
 
-    result := c.callApi("eth_syncing")
+    result, err := c.callApi("eth_syncing")
 
     var response EthSyncingResponse
     response.Status = false
@@ -139,20 +138,23 @@ func (c *Client) IsSyncing() EthSyncingResponse {
 		    response.Data = data
     }
 
-    return response
+    return response, err
 
 }
 
-func (c *Client) GetBlockDataByNumber(blockNum string)  Block {
-    result := c.callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
-
-    return extractBlockData(result)
+func (c *Client) GetBlockDataByNumber(blockNum string)  (Block, error) {
+    result, err := c.callApiWithParams("eth_getBlockByNumber", []interface{}{blockNum, true})
+    if err != nil {
+        var block Block
+        return block, err
+    }
+    return extractBlockData(result), nil
 }
 
-func (c *Client) GetBlockDataByHash(blockHash string) Block {
-    result := c.callApiWithParams("eth_getBlockByHash", []interface{}{blockHash, true})
+func (c *Client) GetBlockDataByHash(blockHash string) (Block, error) {
+    result, err := c.callApiWithParams("eth_getBlockByHash", []interface{}{blockHash, true})
 
-    return extractBlockData(result)
+    return extractBlockData(result), err
 }
 
 func extractBlockData(input interface{}) Block {
@@ -208,25 +210,29 @@ func humanise(input string) string {
 }
 
 
-func (c *Client) GetTxn(txNum string) Transaction {
-    result := c.callApiWithParams("eth_getTransactionByHash", []interface{}{txNum})
+func (c *Client) GetTxn(txNum string) (Transaction, error) {
+    result, err := c.callApiWithParams("eth_getTransactionByHash", []interface{}{txNum})
+    if err != nil {
+        var transaction Transaction
+        return transaction, err
+    }
 
-    return extractTransactionData(result)
+    return extractTransactionData(result), err
 }
 
-func (c *Client) GetTxnReceipt(txHash string) TransactionReceipt {
-    result := c.callApiWithParams("eth_getTransactionReceipt", []interface{}{txHash})
+func (c *Client) GetTxnReceipt(txHash string) (TransactionReceipt, error) {
+    result, err := c.callApiWithParams("eth_getTransactionReceipt", []interface{}{txHash})
     tdata := make(map[string]string)
     for ti, tu := range result.(map[string]interface {}) {
         if  tus, ok := tu.(string); ok {
             tdata[ti] = tus
         }
     }
-    return TransactionReceipt{tdata["hash"], tdata}
+    return TransactionReceipt{tdata["hash"], tdata}, err
 }
 
-func (c *Client) GetAccountBalance(accAddress string) Account {
-    result := c.callApiWithParams("eth_getBalance", []interface{}{accAddress, "latest"})
+func (c *Client) GetAccountBalance(accAddress string) (Account, error) {
+    result, err := c.callApiWithParams("eth_getBalance", []interface{}{accAddress, "latest"})
 
     if s, ok := result.(string); ok {
         // there might be a better way to do this, but as the balances are often > 64 bit numbers, we handle this by:
@@ -239,7 +245,7 @@ func (c *Client) GetAccountBalance(accAddress string) Account {
 
         f2, _ := f.Float64()
 
-        return Account{accAddress, f2 / math.Pow10(18)}
+        return Account{accAddress, f2 / math.Pow10(18)}, err
     }
-    return Account{accAddress, 0.0}
+    return Account{accAddress, 0.0}, err
 }

@@ -16,9 +16,10 @@ var gethClient = lib.Client{
     }
 
 func status(w http.ResponseWriter, r *http.Request) {
-    syncData := gethClient.IsSyncing()
+    syncData, _ := gethClient.IsSyncing()
+    blockNumber, _ := gethClient.BlockNumber()
 
-    var PageVars = struct{PageTitle string; LatestBlock interface{}; SyncData lib.EthSyncingResponse}{"Status", gethClient.BlockNumber(), syncData}
+    var PageVars = struct{PageTitle string; LatestBlock interface{}; SyncData lib.EthSyncingResponse}{"Status", blockNumber, syncData}
 
     t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
     if err != nil {
@@ -39,13 +40,12 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
     var block string
     var blockData lib.Block
 
-
     // check if we got a number
     if block = r.Form.Get("block"); block != "" {
-      blockData = gethClient.GetBlockDataByNumber(block)
+      blockData, _ = gethClient.GetBlockDataByNumber(block)
     } else {
 	    // otherwise, try hash
-      blockData = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
+      blockData, _ = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
     }
 
     var PageVars = struct{PageTitle string; BlockData lib.Block}{"View Block", blockData}
@@ -64,9 +64,21 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
 
 func viewTransaction(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
+
     tx := r.Form.Get("tx")
-    txData := gethClient.GetTxn(tx)
-    txReceipt := gethClient.GetTxnReceipt(tx)
+    txData, err := gethClient.GetTxn(tx)
+    if err != nil {
+      log.Print("API error: ", err)
+      http.Error(w, "Error", 500)
+      return
+    }
+
+    txReceipt, err := gethClient.GetTxnReceipt(tx)
+    if err != nil {
+      log.Print("API error: ", err)
+      http.Error(w, "Error", 500)
+      return
+    }
 
     var PageVars = struct{PageTitle string; Txn lib.Transaction; TxReceipt lib.TransactionReceipt}{"View Transaction", txData, txReceipt}
 
@@ -85,7 +97,7 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
 func viewAccount(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
     acc := r.Form.Get("acc")
-    accData := gethClient.GetAccountBalance(acc)
+    accData, _ := gethClient.GetAccountBalance(acc)
 
     var PageVars = struct{PageTitle string; Acc lib.Account}{"View Account", accData}
 
@@ -103,6 +115,7 @@ func viewAccount(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
+  log.SetFlags(log.LstdFlags | log.Lshortfile)
     http.HandleFunc("/", status)
     http.HandleFunc("/status", status)
     http.HandleFunc("/block", viewBlock)
