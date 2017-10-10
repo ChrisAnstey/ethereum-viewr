@@ -43,6 +43,11 @@ type Transaction struct {
     Data map[string]string
 }
 
+type TransactionReceipt struct {
+    Hash string
+    Data map[string]string
+}
+
 type Block struct {
     Hash string
     Number int64
@@ -201,5 +206,16 @@ func (c *Client) GetTxn(txNum string) Transaction {
     result := c.callApiWithParams("eth_getTransactionByHash", []interface{}{txNum})
 
     return extractTransactionData(result)
+}
+
+func (c *Client) GetTxnReceipt(txHash string) TransactionReceipt {
+    result := c.callApiWithParams("eth_getTransactionReceipt", []interface{}{txHash})
+    tdata := make(map[string]string)
+    for ti, tu := range result.(map[string]interface {}) {
+        if  tus, ok := tu.(string); ok {
+            tdata[ti] = tus
+        }
+    }
+    return TransactionReceipt{tdata["hash"], tdata}
 }
 
