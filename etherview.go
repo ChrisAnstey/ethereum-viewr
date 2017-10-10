@@ -82,11 +82,31 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func viewAccount(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()
+    acc := r.Form.Get("acc")
+    accData := gethClient.GetAccountBalance(acc)
+
+    var PageVars = struct{PageTitle string; Acc lib.Account}{"View Account", accData}
+
+    t, err := template.ParseFiles("html/page/account.html", "html/layout/template.html") //parse the html files
+    if err != nil {
+      log.Print("template parsing error: ", err)
+    }
+
+    //execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
+    err = t.ExecuteTemplate(w, "layout", PageVars)
+    if err != nil {
+      log.Print("template executing error: ", err)
+    }
+}
+
 
 func main() {
     http.HandleFunc("/", status)
     http.HandleFunc("/status", status)
     http.HandleFunc("/block", viewBlock)
     http.HandleFunc("/tx", viewTransaction)
+    http.HandleFunc("/account", viewAccount)
     log.Fatal(http.ListenAndServe(":8088", nil))
 }

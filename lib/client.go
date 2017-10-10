@@ -13,6 +13,7 @@ import (
     "github.com/fatih/camelcase"
     "strings"
     "math"
+    "math/big"
 )
 
 type Request1 struct {
@@ -54,6 +55,11 @@ type Block struct {
     Timestamp time.Time
     Data map[string]string
     Transactions map[string]Transaction
+}
+
+type Account struct {
+    Address string
+    Balance float64
 }
 
 func (c *Client) callApiWithParams(method string, params interface{}) interface{} {
@@ -219,3 +225,21 @@ func (c *Client) GetTxnReceipt(txHash string) TransactionReceipt {
     return TransactionReceipt{tdata["hash"], tdata}
 }
 
+func (c *Client) GetAccountBalance(accAddress string) Account {
+    result := c.callApiWithParams("eth_getBalance", []interface{}{accAddress, "latest"})
+
+    if s, ok := result.(string); ok {
+        // there might be a better way to do this, but as the balances are often > 64 bit numbers, we handle this by:
+        // convert to a big int, then convert to a big float, so we can convert to float64, then we divide by 10^18
+        i := new(big.Int)
+        i.SetString(s, 0)
+
+        f := new(big.Float)
+        f.SetInt(i)
+
+        f2, _ := f.Float64()
+
+        return Account{accAddress, f2 / math.Pow10(18)}
+    }
+    return Account{accAddress, 0.0}
+}
