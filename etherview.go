@@ -16,8 +16,19 @@ var gethClient = lib.Client{
     }
 
 func status(w http.ResponseWriter, r *http.Request) {
-    syncData, _ := gethClient.IsSyncing()
-    blockNumber, _ := gethClient.BlockNumber()
+    syncData, err := gethClient.IsSyncing()
+    if err != nil {
+      log.Print("API error: ", err)
+      http.Error(w, "Error", 500)
+      return
+    }
+
+    blockNumber, err := gethClient.BlockNumber()
+    if err != nil {
+      log.Print("API error: ", err)
+      http.Error(w, "Error", 500)
+      return
+    }
 
     var PageVars = struct{PageTitle string; LatestBlock interface{}; SyncData lib.EthSyncingResponse}{"Status", blockNumber, syncData}
 
@@ -70,7 +81,12 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
 func viewAccount(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
     acc := r.Form.Get("acc")
-    accData, _ := gethClient.GetAccountBalance(acc)
+    accData, err := gethClient.GetAccountBalance(acc)
+    if err != nil {
+      log.Print("API error: ", err)
+      http.Error(w, "Error", 500)
+      return
+    }
 
     var PageVars = struct{PageTitle string; Acc lib.Account}{"View Account", accData}
 
@@ -81,12 +97,16 @@ func outputPage(w http.ResponseWriter, pageTemplate string, pageVars interface{}
     t, err := template.ParseFiles(pageTemplate, "html/layout/template.html") //parse the html files
     if err != nil {
       log.Print("template parsing error: ", err)
+      http.Error(w, "Error", 500)
+      return
     }
 
     //execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
     err = t.ExecuteTemplate(w, "layout", pageVars)
     if err != nil {
       log.Print("template executing error: ", err)
+      http.Error(w, "Error", 500)
+      return
     }
 
 }
