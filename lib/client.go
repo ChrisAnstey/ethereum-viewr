@@ -121,9 +121,14 @@ func (c *Client) BlockNumber() (interface{}, error) {
 
 func (c *Client) IsSyncing() (EthSyncingResponse, error) {
 
+    var response EthSyncingResponse
+
     result, err := c.callApi("eth_syncing")
 
-    var response EthSyncingResponse
+    if err != nil {
+        return response, err
+    }
+
     response.Status = false
 
     switch v := result.(type) {
@@ -138,7 +143,7 @@ func (c *Client) IsSyncing() (EthSyncingResponse, error) {
 		    response.Data = data
     }
 
-    return response, err
+    return response, nil
 
 }
 
@@ -153,6 +158,10 @@ func (c *Client) GetBlockDataByNumber(blockNum string)  (Block, error) {
 
 func (c *Client) GetBlockDataByHash(blockHash string) (Block, error) {
     result, err := c.callApiWithParams("eth_getBlockByHash", []interface{}{blockHash, true})
+    if err != nil {
+        var block Block
+        return block, err
+    }
 
     return extractBlockData(result), err
 }
