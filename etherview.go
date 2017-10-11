@@ -41,13 +41,19 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
     // get by number
     var block string
     var blockData lib.Block
+    var err error
 
     // check if we got a number
     if block = r.Form.Get("block"); block != "" {
-      blockData, _ = gethClient.GetBlockDataByNumber(block)
+      blockData, err = gethClient.GetBlockDataByNumber(block)
     } else {
 	    // otherwise, try hash
-      blockData, _ = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
+      blockData, err = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
+    }
+    if err != nil {
+      log.Print("API error: ", err)
+      http.Error(w, "Error", 500)
+      return
     }
 
     var PageVars = struct{PageTitle string; BlockData lib.Block}{"View Block", blockData}
