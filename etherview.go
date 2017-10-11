@@ -21,16 +21,7 @@ func status(w http.ResponseWriter, r *http.Request) {
 
     var PageVars = struct{PageTitle string; LatestBlock interface{}; SyncData lib.EthSyncingResponse}{"Status", blockNumber, syncData}
 
-    t, err := template.ParseFiles("html/page/status.html", "html/layout/template.html") //parse the html file
-    if err != nil {
-  	  log.Print("template parsing error: ", err)
-  	}
-
-  	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.ExecuteTemplate(w, "layout", PageVars)
-    if err != nil {
-  	  log.Print("template executing error: ", err)
-	}
+    outputPage(w, "html/page/status.html", PageVars);
 }
 
 func viewBlock(w http.ResponseWriter, r *http.Request) {
@@ -50,16 +41,7 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
 
     var PageVars = struct{PageTitle string; BlockData lib.Block}{"View Block", blockData}
 
-    t, err := template.ParseFiles("html/page/block.html", "html/layout/template.html") //parse the html file
-    if err != nil {
-  	  log.Print("template parsing error: ", err)
-  	}
-
-  	//execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.ExecuteTemplate(w, "layout", PageVars)
-    if err != nil {
-    	  log.Print("template executing error: ", err)
-  	}
+    outputPage(w, "html/page/block.html", PageVars);
 }
 
 func viewTransaction(w http.ResponseWriter, r *http.Request) {
@@ -82,16 +64,7 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
 
     var PageVars = struct{PageTitle string; Txn lib.Transaction; TxReceipt lib.TransactionReceipt}{"View Transaction", txData, txReceipt}
 
-    t, err := template.ParseFiles("html/page/transaction.html", "html/layout/template.html") //parse the html files
-    if err != nil {
-      log.Print("template parsing error: ", err)
-    }
-
-    //execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.ExecuteTemplate(w, "layout", PageVars)
-    if err != nil {
-      log.Print("template executing error: ", err)
-    }
+    outputPage(w, "html/page/transaction.html", PageVars);
 }
 
 func viewAccount(w http.ResponseWriter, r *http.Request) {
@@ -101,18 +74,22 @@ func viewAccount(w http.ResponseWriter, r *http.Request) {
 
     var PageVars = struct{PageTitle string; Acc lib.Account}{"View Account", accData}
 
-    t, err := template.ParseFiles("html/page/account.html", "html/layout/template.html") //parse the html files
+    outputPage(w, "html/page/account.html", PageVars);
+}
+
+func outputPage(w http.ResponseWriter, pageTemplate string, pageVars interface{}) {
+    t, err := template.ParseFiles(pageTemplate, "html/layout/template.html") //parse the html files
     if err != nil {
       log.Print("template parsing error: ", err)
     }
 
     //execute the template, pass it the PageVars struct to fill in the gaps, and the ResponseWriter to output the result
-    err = t.ExecuteTemplate(w, "layout", PageVars)
+    err = t.ExecuteTemplate(w, "layout", pageVars)
     if err != nil {
       log.Print("template executing error: ", err)
     }
-}
 
+}
 
 func main() {
   log.SetFlags(log.LstdFlags | log.Lshortfile)
