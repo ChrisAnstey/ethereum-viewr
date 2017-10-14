@@ -1,6 +1,6 @@
 {{define "content"}}
 	<h3>Transaction: {{.Txn.Hash}}</h3>
-	From block: <a href="block?block={{.Txn.Data.blockNumber}}">{{.Txn.Data.blockNumber}}</a>
+	From block: <a href="block?blockHash={{index .Txn.Data "Block Hash"}}">{{index .Txn.Data "Block Number"}}</a>
 
 	<h4>Data</h4>
 	<table class="table table-bordered">
@@ -12,7 +12,16 @@
 	<h4>Receipt</h4>
 	<table class="table table-bordered">
 		{{range $key, $value := .TxReceipt.Data}}
-			<tr><td>{{ $key }}</td><td>{{ $value }}</td></tr>
+			<tr>
+				<td>{{ $key }}</td>
+				<td>
+					{{if eq $key "Logs Bloom"}}
+						{{  printf "%.64s" $value }}...
+					{{else}}
+						{{ $value }}
+					{{end}}
+				</td>
+			</tr>
 		{{end}}
 	</table>
 {{end}}

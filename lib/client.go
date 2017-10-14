@@ -198,20 +198,34 @@ func extractTransactions(input interface{}) map[string]Transaction {
     transactions := make(map[string]Transaction)
     for _, tu := range input.([]interface {}) {
         transaction := extractTransactionData(tu)
-        transactions[transaction.Data["hash"]] = transaction
+        transactions[transaction.Data["Hash"]] = transaction
     }
     return transactions
 }
 
 func extractTransactionData(input interface{}) Transaction {
     tdata := make(map[string]string)
+    var value float64
     for ti, tu := range input.(map[string]interface {}) {
         if  tus, ok := tu.(string); ok {
-            tdata[ti] = tus
+            // attempt a decimal conversion
+            dectus, err := strconv.ParseInt(tus, 0, 64)
+            // if the parse failed...
+            if err != nil {
+                // we'll just use the original string
+                tdata[humanise(ti)] = tus
+            } else {
+                // otherwise, we'll use the decimal conversion string
+                if ti == "value" {
+                    // for the value, we'll do a Wei to Ether conversion
+                    value = float64(dectus) / math.Pow10(18)
+                } else {
+                    tdata[humanise(ti)] = strconv.FormatInt(dectus, 10)
+                }
+            }
         }
     }
-    valueDec, _ := strconv.ParseInt(tdata["value"], 0, 64)
-    return Transaction{tdata["hash"], float64(valueDec) / math.Pow10(18), tdata}
+    return Transaction{tdata["Hash"], value, tdata}
 }
 
 func humanise(input string) string {
@@ -234,7 +248,16 @@ func (c *Client) GetTxnReceipt(txHash string) (TransactionReceipt, error) {
     tdata := make(map[string]string)
     for ti, tu := range result.(map[string]interface {}) {
         if  tus, ok := tu.(string); ok {
-            tdata[ti] = tus
+            // attempt a decimal conversion
+            dectus, err := strconv.ParseInt(tus, 0, 64)
+            // if the parse failed...
+            if err != nil {
+                // we'll just use the original string
+                tdata[humanise(ti)] = tus
+            } else {
+                // otherwise, we'll use the decimal conversion string
+                tdata[humanise(ti)] = strconv.FormatInt(dectus, 10)
+            }
         }
     }
     return TransactionReceipt{tdata["hash"], tdata}, err
