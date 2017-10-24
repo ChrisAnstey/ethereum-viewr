@@ -14,6 +14,7 @@ import (
     "strings"
     "math"
     "math/big"
+    "errors"
 )
 
 type Request1 struct {
@@ -153,6 +154,11 @@ func (c *Client) GetBlockDataByNumber(blockNum string)  (Block, error) {
         var block Block
         return block, err
     }
+    if result == nil {
+        var block Block
+        return block, errors.New("Block not found")
+    }
+
     return extractBlockData(result), nil
 }
 
@@ -161,6 +167,10 @@ func (c *Client) GetBlockDataByHash(blockHash string) (Block, error) {
     if err != nil {
         var block Block
         return block, err
+    }
+    if result == nil {
+        var block Block
+        return block, errors.New("Block not found")
     }
 
     return extractBlockData(result), err
@@ -224,6 +234,10 @@ func (c *Client) GetTxn(txNum string) (Transaction, error) {
     if err != nil {
         var transaction Transaction
         return transaction, err
+    }
+    if result == nil {
+        var transaction Transaction
+        return transaction, errors.New("Transaction not found")
     }
 
     return extractTransactionData(result), err

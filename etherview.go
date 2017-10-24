@@ -52,7 +52,7 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
     }
     if err != nil {
       log.Print("API error: ", err)
-      http.Error(w, "Error", 500)
+      http.Error(w, "Error finding block", 500)
       return
     }
 
@@ -75,7 +75,7 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
     txReceipt, err := gethClient.GetTxnReceipt(tx)
     if err != nil {
       log.Print("API error: ", err)
-      http.Error(w, "Error", 500)
+      http.Error(w, "Error finding Transaction", 500)
       return
     }
 
