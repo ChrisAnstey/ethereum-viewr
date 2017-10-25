@@ -47,18 +47,18 @@ func viewBlock(w http.ResponseWriter, r *http.Request) {
 	var blockData lib.Block
 	var err error
 
-    // check if we got a number
-    if block = r.Form.Get("block"); block != "" {
-      blockData, err = gethClient.GetBlockDataByNumber(block)
-    } else {
-	    // otherwise, try hash
-      blockData, err = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
-    }
-    if err != nil {
-      log.Print("API error: ", err)
-      http.Error(w, "Error finding block", 500)
-      return
-    }
+	// check if we got a number
+	if block = r.Form.Get("block"); block != "" {
+		blockData, err = gethClient.GetBlockDataByNumber(block)
+	} else {
+		// otherwise, try hash
+		blockData, err = gethClient.GetBlockDataByHash(r.Form.Get("blockHash"))
+	}
+	if err != nil {
+		log.Print("API error: ", err)
+		http.Error(w, "Error finding block", 500)
+		return
+	}
 
 	var PageVars = struct {
 		PageTitle string
@@ -79,12 +79,12 @@ func viewTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    txReceipt, err := gethClient.GetTxnReceipt(tx)
-    if err != nil {
-      log.Print("API error: ", err)
-      http.Error(w, "Error finding Transaction", 500)
-      return
-    }
+	txReceipt, err := gethClient.GetTxnReceipt(tx)
+	if err != nil {
+		log.Print("API error: ", err)
+		http.Error(w, "Error finding Transaction", 500)
+		return
+	}
 
 	var PageVars = struct {
 		PageTitle string
