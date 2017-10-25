@@ -29,8 +29,8 @@
 		{{ range $key, $value := .BlockData.Transactions }}
 			<tr>
 				<td><a href="tx?tx={{ $key }}">{{ printf "%.20s" $key }}...</a></td>
-				<td><a href="account?acc={{ $value.Data.from }}">{{ printf "%.20s" $value.Data.from }}...</a></td>
-				<td><a href="account?acc={{ $value.Data.to }}">{{ printf "%.20s" $value.Data.to }}...</a></td>
+				<td><a href="account?acc={{ $value.Data.From }}">{{ printf "%.20s" $value.Data.From }}...</a></td>
+				<td><a href="account?acc={{ $value.Data.To }}">{{ printf "%.20s" $value.Data.To }}...</a></td>
 				<td>
 					<span style="
 					{{ if eq 0.0 $value.Value }}
