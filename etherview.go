@@ -113,6 +113,35 @@ func viewAccount(w http.ResponseWriter, r *http.Request) {
 	outputPage(w, "html/page/account.html", PageVars)
 }
 
+func viewToken(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	address := r.Form.Get("token")
+	var token = lib.Token{
+		Address: address,
+		Client:  gethClient,
+	}
+
+	_, err := token.GetName()
+	if err != nil {
+		log.Print("API error: ", err)
+		http.Error(w, "Error", 500)
+		return
+	}
+	_, err = token.GetTotalSupply()
+	if err != nil {
+		log.Print("API error: ", err)
+		http.Error(w, "Error", 500)
+		return
+	}
+
+	var PageVars = struct {
+		PageTitle string
+		Token     lib.Token
+	}{"View token", token}
+
+	outputPage(w, "html/page/token.html", PageVars)
+}
+
 func outputPage(w http.ResponseWriter, pageTemplate string, pageVars interface{}) {
 	t, err := template.ParseFiles(pageTemplate, "html/layout/template.html") //parse the html files
 	if err != nil {
@@ -137,6 +166,7 @@ func main() {
 	http.HandleFunc("/status", status)
 	http.HandleFunc("/block", viewBlock)
 	http.HandleFunc("/tx", viewTransaction)
+	http.HandleFunc("/token", viewToken)
 	http.HandleFunc("/account", viewAccount)
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
